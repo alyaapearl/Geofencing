@@ -10,6 +10,7 @@ int main(int argc, char *argv[])
 	int socket_desc;
 	int sock1;
 	int rval;
+	int op_val,route;
 	struct sockaddr_in server;
 	char buff[1024];
 
@@ -52,8 +53,25 @@ int main(int argc, char *argv[])
 				printf("END CONNECTION\n");
 			else
 				printf("MSG: %s\n",buff);
-			printf("I'VE GOT THE MESSAGE (rval = $d)\n", rval);
-			close(sock1);
+			printf("I'VE GOT THE MESSAGE \n", rval);
+			getsockopt(socket_desc, SOL_SOCKET, SO_DONTROUTE, &op_val, &route);
+			if(op_val != 0)
+			{
+				printf("UNABLE TO GET\n");
+
+			}
+			printf("Get SO_DONTROUTE : %d\n",op_val);
+			op_val = 1;
+			setsockopt(socket_desc, SOL_SOCKET, SO_DONTROUTE, &op_val, sizeof 1);
+				printf("ALREADY SET \n");
+			getsockopt(socket_desc, SOL_SOCKET, SO_DONTROUTE, &op_val, &route);
+			if(op_val == 0)
+				printf("UNABLE TO GET \n");
+			else
+				printf("Get New SO_DONTROUTE : %d\n",op_val);
+
+		close(sock1);
+		exit(1);
 		}
 	} while (1);
 	return 0;
