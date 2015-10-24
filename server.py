@@ -9,7 +9,7 @@ PORT = 5010
 #datagram(udp) socket
 try:
 	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	print 'Socket READY !!!'
+	print 'Socket READY 1'
 except socket.error, msg:
 	print 'FAILED to create socket. Error code : '+str(msg[0])+'Message'+msg[1]
 	sys.exit()
@@ -23,7 +23,7 @@ except socket.error, msg:
 	print 'Bind FAILED. Error code : '+str(msg[0])+' Message\n'+msg[1]
 	sys.exit()
 
-print 'Socket bind complete !!'
+print 'Socket bind 1 completed !!'
 
 #talking with the client
 while True:
@@ -47,13 +47,26 @@ while True:
 		print "DESCRIPTION : ", os.strerror(errno.EINPROGRESS)
 #pitfall 2
 		sock.close()
-
 	
 	set = sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE,1)
 	print "Set SO_KEEPALIVE : ", sock.getsockopt(socket.SOL_SOCKET, socket.
 SO_KEEPALIVE)
 	
 	break
+#pitfall 3
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+print "Socket READY 2"
+ret = sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+try: 
+	sock.bind((HOST, PORT))
+except socket.error, msg:
+	print 'Bind FAILED. Error code : '+str(msg[0])+' Message\n'+msg[1]
+	sys.exit()	
+
+print 'Socket bind 2 completed !!'
+
+#pitfall 4
 sock.close()
+
 
 
