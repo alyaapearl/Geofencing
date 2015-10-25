@@ -3,6 +3,7 @@
 #include <netinet/in.h>
 #include <string.h>
 #include <stdlib.h>
+#include <errno.h>
 
 int main()
 {
@@ -12,7 +13,7 @@ int main()
 	struct sockaddr_storage serverStorage;
 	socklen_t addr_size, client_addr_size;
 	int i;
-	
+
 	//Create UDP socket
 	sockUDP = socket(AF_INET, SOCK_DGRAM, 0);
 
@@ -30,16 +31,37 @@ int main()
 
 	while(1)
 	{
-	/*Try to receive any incoming UDp datagram.Address and port of 
-	requesting client will be stored on serverStorage variable*/
+		/*Try to receive any incoming UDp datagram.Address and port of 
+		requesting client will be stored on serverStorage variable*/
 		nBytes = recvfrom(sockUDP,buffer,1024,0,(struct sockaddr *)&serverStorage, &addr_size);
-	
-	//convert message received to uppercase
+
+		//convert message received to uppercase
 		for(i=0;i<nBytes-1;i++)
 			buffer[i] = toupper(buffer[i]);
 
-	//send uppercase message back to client,using serverStorage as the address
+		//send uppercase message back to client,using serverStorage as the address
 		sendto(sockUDP,buffer,nBytes,0,(struct sockaddr *)&serverStorage,addr_size);
+
+		//pitfall 1
+		int status,sockNew,route;
+
+		getsockopt(sockUDP, SOL_SOCKET, SO_DONTROUTE, &status, &route);
+		if(status == 0)
+		{
+		//enable(nonzero) or disable(zero) the bypassing of routing tables for outgoing msg
+			printf("ROUTING MESSAGE 1: %s\n",strerror(errno));
+		}
+		else
+			printf("STATUS 1: %d\n",&status);
+
+		status = 1;
+		setsockopt(sockUDP, SOL_SOCKET, SO_DONTROUTE, &status, sizeof 1);
+			printf("SET SO_DONTROUTE SUCCESS \n");
+		getsockopt(sockUDP, SOL_SOCKET, SO_DONTROUTE, &status, &route);
+		if(status == 0)
+			printf("ROUTING MESSAGE 2: %s\n",strerror(errno));
+		else
+			printf("STATUS 2: %d\n",status);
 	}
 	return 0;
 }

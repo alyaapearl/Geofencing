@@ -24,7 +24,7 @@ int main()
 
 	while(1)
 	{
-		printf("Message to server : \n");
+		printf("Message to server : ");
 		fgets(buffer,1024,stdin);
 		printf("You typed :%s", buffer);
 
